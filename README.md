@@ -79,3 +79,29 @@ To build the index, run exact vs approximate search, and output performance metr
 ```bash
 python3 main.py
 ```
+
+---
+
+## Technical Details
+
+### 1. Inverted File Index (IVF-Flat)
+
+The approximate search uses a clustering-based IVF index to divide the dataset:
+
+- **Index Construction (Offline):**
+  - $K$-Means clustering identifies $P$ centroid vectors.
+  - Every vector in the dataset is assigned to its nearest centroid.
+  - Vectors within each cluster are sorted by their distance to the centroid to optimize candidate scanning.
+- **Query Resolution (Online):**
+  - Calculate the distances between the query vector $q$ and all $P$ centroids.
+  - Select the $M$ closest centroids.
+  - Retrieve all candidate vector indices belonging to these $M$ clusters.
+  - Perform exhaustive distance computations and sort the top $K$ nearest neighbors only from this subset.
+
+### 2. Tradeoff Analysis: Speed vs. Recall
+
+- **Recall@K** measures the overlap fraction between the approximate K-NN result and the exact K-NN result:
+  $$\text{Recall}@K = \frac{|R_{\text{approx}} \cap R_{\text{exact}}|}{K}$$
+- By adjusting $M$ (the number of clusters probed):
+  - **Larger $M$:** Increases Recall (closer to 100%), but increases search time (lower QPS).
+  - **Smaller $M$:** Decreases search time (higher QPS), but reduces Recall.
