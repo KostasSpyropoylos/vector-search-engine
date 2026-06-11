@@ -1,107 +1,107 @@
-# Vector Search Engine for High-Dimensional Vectors
+# Μηχανή Διανυσματικής Αναζήτησης για Διανύσματα Υψηλής Διάστασης
 
-An efficient Python-based implementation of a **Vector Search Engine** utilizing exact and approximate K-Nearest Neighbors (K-NN) search algorithms. Developed as part of the **Information Retrieval (Ανάκτηση Πληροφοριών)** coursework.
+Μια αποδοτική υλοποίηση σε Python μιας **Μηχανής Διανυσματικής Αναζήτησης (Vector Search Engine)** που χρησιμοποιεί αλγορίθμους ακριβούς (exact) και προσεγγιστικής (approximate) αναζήτησης **K-Nearest Neighbors (K-NN)**. Αναπτύχθηκε στο πλαίσιο του μαθήματος **Ανάκτηση Πληροφοριών**.
 
-This engine implements the **Inverted File Index (IVF-flat)** architecture using $K$-Means clustering to achieve sub-linear query processing times on high-dimensional datasets. It is benchmarked against the standard **SIFT1M** dataset containing 1,000,000 128-dimensional vectors.
-
----
-
-## Features
-
-- **Exhaustive Exact K-NN Search:** Computes exact squared Euclidean distances to all dataset vectors to guarantee 100% accuracy.
-- **Inverted File Index (IVF-Flat) Approximate Search:** Partitions the vector space into $P$ clusters using $K$-Means and limits candidate scanning to the $M$ most promising clusters.
-- **Fast Binary Reading:** Handled by a specialized parser for the `.fvecs` format to load large vector datasets quickly.
-- **Comprehensive Evaluation Pipeline:** Compares performance metrics such as **Queries Per Second (QPS)**, **Execution Time (seconds)**, and **Recall@K** to visualize the accuracy-speed tradeoff.
+Η μηχανή αυτή υλοποιεί την αρχιτεκτονική **Inverted File Index (IVF-Flat)** χρησιμοποιώντας ομαδοποίηση **K-Means** για την επίτευξη υπο-γραμμικών χρόνων επεξεργασίας ερωτημάτων σε σύνολα δεδομένων υψηλής διάστασης, με δυνατότητα μείωσης διαστάσεων μέσω **PCA (Principal Component Analysis)**. Η αξιολόγηση πραγματοποιείται στο πρότυπο σύνολο δεδομένων **SIFT1M** (128 διαστάσεων).
 
 ---
 
-## Project Structure
+## Χαρακτηριστικά
+
+- **Ακριβής Αναζήτηση K-NN (Exact K-NN):** Υπολογίζει τις ακριβείς τετραγωνικές Ευκλείδειες αποστάσεις προς όλα τα διανύσματα του συνόλου δεδομένων για εγγυημένη ακρίβεια 100%.
+- **Προσεγγιστική Αναζήτηση IVF-Flat (Approximate K-NN):** Διαμερίζει τον διανυσματικό χώρο σε $P$ συστάδες (clusters) με K-Means και περιορίζει τη σάρωση υποψηφίων στις $M$ πιο υποσχόμενες συστάδες.
+- **Μείωση Διαστάσεων με PCA:** Μειώνει τις διαστάσεις των διανυσμάτων (π.χ. από 128 σε 2) για δραστική επιτάχυνση της αναζήτησης και δυνατότητα 2D οπτικοποίησης.
+- **Αυτόματη Δημιουργία Αναφοράς PDF (`generate_report.py`):**
+  - Εκτελεί αυτόματα πειράματα μεταβάλλοντας παραμέτρους όπως ο αριθμός των ομάδων $M$, το πλήθος των γειτόνων $k$, και το μέγεθος των δεδομένων $|S|$.
+  - Δημιουργεί διαγράμματα της επίδρασης των παραμέτρων αυτών στο QPS (Queries Per Second) και στο Recall.
+  - Εξάγει μια πλήρη, επαγγελματική αναφορά σε μορφή PDF (`output/report.pdf`) γραμμένη στα Ελληνικά με ενσωματωμένα διαγράμματα, πίνακες τιμών, θεωρητική ανάλυση και αριθμητικό παράδειγμα λειτουργίας.
+
+---
+
+## Δομή Έργου
 
 ```text
-├── dataset/                     # Directory for dataset files (ignored by Git)
-│   ├── sift_base.fvecs          # 1,000,000 base vectors (128-d)
-│   ├── sift_query.fvecs         # 10,000 query vectors (128-d)
-│   ├── sift_learn.fvecs         # 100,000 learning vectors (128-d)
-│   └── sift_groundtruth.ivecs   # Ground truth nearest neighbors
+├── dataset/                     # Κατάλογος με τα αρχεία SIFT (αγνοείται από το Git)
+│   ├── sift_base.fvecs          # 1,000,000 διανύσματα βάσης (128-d)
+│   ├── sift_query.fvecs         # 10,000 διανύσματα ερωτημάτων (128-d)
+│   └── sift_groundtruth.ivecs   # Ground truth πλησιέστεροι γείτονες
 ├── models/
 │   ├── __init__.py
-│   └── search_engine.py         # VectorSearchEngine class (exact & approx search)
+│   └── search_engine.py         # Κλάση VectorSearchEngine (exact & approx search, PCA, K-Means)
 ├── utils/
 │   ├── __init__.py
-│   ├── file_reader.py           # fvecs file parsing helper
-│   └── evalution_util.py        # Evaluation pipeline (Recall, QPS, Latency)
-├── main.py                      # Main entrypoint script
-├── .gitignore                   # Standard Python Git ignore rules
-└── README.md                    # Project documentation
+│   ├── file_reader.py           # Αναγνώστης αρχείων μορφής fvecs & εξαγωγή σε txt
+│   ├── debugging_methods.py     # Διαδραστικό εργαλείο αποσφαλμάτωσης
+│   └── evalution_util.py        # Pipeline αξιολόγησης (Recall, QPS, Latency)
+├── output/                      # Παραγόμενα αρχεία, διαγράμματα και η αναφορά PDF
+│   ├── report.pdf               # Η παραγόμενη αναφορά PDF
+│   └── ...                      # Διαγράμματα και txt αποτελέσματα
+├── main.py                      # Κύριο αρχείο εκτέλεσης της εφαρμογής
+├── generate_report.py           # Σενάριο πειραμάτων και αυτόματης έκδοσης PDF αναφοράς
+├── requirements.txt             # Εξαρτήσεις πακέτων Python
+├── references.md                # Αναφορές και βιβλιογραφία
+└── README.md                    # Τεκμηρίωση έργου (στα Ελληνικά)
 ```
 
 ---
 
-## Dataset Setup
+## Εγκατάσταση & Ρύθμιση
 
-The engine is benchmarked on the **SIFT1M** dataset.
-
-1. **Download the SIFT dataset:**
-   - URL: [SIFT1M Corpus (ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz)](ftp://ftp.irisa.fr/local/texmex/corpus/sift.tar.gz)
-2. **Extract files:**
-   - Extract the contents into the `dataset/` directory inside the repository.
-   - Verify that `sift_base.fvecs` and `sift_query.fvecs` are present inside `dataset/`.
-
----
-
-## Installation & Setup
-
-1. **Clone the Repository:**
-
+1. **Κλωνοποίηση του Αποθετηρίου:**
    ```bash
    git clone https://github.com/KostasSpyropoylos/vector-search-engine.git
    cd vector-search-engine
    ```
 
-2. **Set up a Virtual Environment:**
-
+2. **Δημιουργία Εικονικού Περιβάλλοντος (Virtual Environment):**
    ```bash
    python3 -m venv venv
    source venv/bin/activate
    ```
 
-3. **Install Dependencies:**
+3. **Εγκατάσταση Εξαρτήσεων:**
    ```bash
    pip install -r requirements.txt
    ```
 
 ---
 
-## Usage
+## Οδηγίες Χρήσης
 
-To build the index, run exact vs approximate search, and output performance metrics, execute the following command:
-
+### 1. Εκτέλεση Διαδραστικού Menu & Αποσφαλμάτωσης
+Για να εκτελέσετε τη βασική εφαρμογή που παρέχει ένα διαδραστικό μενού για τη δημιουργία ευρετηρίων, την αποθήκευση αποτελεσμάτων σε txt, την οπτικοποίηση των clusters και την αξιολόγηση:
 ```bash
 python3 main.py
 ```
 
+### 2. Εκτέλεση Πειραμάτων & Παραγωγή Αναφοράς PDF
+Για να εκτελέσετε την πειραματική αξιολόγηση (μεταβολή των $M, k, |S|$) και να δημιουργήσετε αυτόματα τη λεπτομερή αναφορά σε μορφή PDF στα ελληνικά:
+```bash
+python3 generate_report.py
+```
+Το αρχείο της αναφοράς θα αποθηκευτεί στη διαδρομή: **`output/report.pdf`**.
+
 ---
 
-## Technical Details
+## Τεχνικές Λεπτομέρειες & Αλγόριθμος
 
 ### 1. Inverted File Index (IVF-Flat)
+Η προσεγγιστική αναζήτηση χωρίζει τον διανυσματικό χώρο σε συστάδες:
+- **Κατασκευή Ευρετηρίου (Offline):**
+  - Η ομαδοποίηση $K$-Means προσδιορίζει $P$ κεντροειδή διανύσματα.
+  - Κάθε διάνυσμα του συνόλου δεδομένων αντιστοιχίζεται στο πλησιέστερο κεντροειδές του.
+  - Τα διανύσματα εντός κάθε συστάδας ταξινομούνται με βάση την απόστασή τους από το κεντροειδές.
+- **Επίλυση Ερωτήματος (Online):**
+  - Υπολογίζονται οι αποστάσεις μεταξύ του διανύσματος ερώτησης $q$ και των $P$ κεντροειδών.
+  - Επιλέγονται τα $M$ πλησιέστερα κεντροειδή.
+  - Ανακτώνται μόνο τα υποψήφια διανύσματα που ανήκουν σε αυτές τις $M$ συστάδες.
+  - Εκτελείται πλήρης υπολογισμός Ευκλείδειας απόστασης μόνο για αυτό το υποσύνολο και επιστρέφονται οι κορυφαίοι $k$ γείτονες.
 
-The approximate search uses a clustering-based IVF index to divide the dataset:
-
-- **Index Construction (Offline):**
-  - $K$-Means clustering identifies $P$ centroid vectors.
-  - Every vector in the dataset is assigned to its nearest centroid.
-  - Vectors within each cluster are sorted by their distance to the centroid to optimize candidate scanning.
-- **Query Resolution (Online):**
-  - Calculate the distances between the query vector $q$ and all $P$ centroids.
-  - Select the $M$ closest centroids.
-  - Retrieve all candidate vector indices belonging to these $M$ clusters.
-  - Perform exhaustive distance computations and sort the top $K$ nearest neighbors only from this subset.
-
-### 2. Tradeoff Analysis: Speed vs. Recall
-
-- **Recall@K** measures the overlap fraction between the approximate K-NN result and the exact K-NN result:
+### 2. Μετρικές Αξιολόγησης
+- **Recall@K (Ανάκληση):**
   $$\text{Recall}@K = \frac{|R_{\text{approx}} \cap R_{\text{exact}}|}{K}$$
-- By adjusting $M$ (the number of clusters probed):
-  - **Larger $M$:** Increases Recall (closer to 100%), but increases search time (lower QPS).
-  - **Smaller $M$:** Decreases search time (higher QPS), but reduces Recall.
+- **QPS (Queries Per Second):**
+  $$\text{QPS} = \frac{\text{Πλήθος Ερωτημάτων}}{\text{Συνολικός Χρόνος Εκτέλεσης (δευτερόλεπτα)}}$$
+- **Tradeoff Ταχύτητας vs. Ακρίβειας:**
+  - **Μεγαλύτερο $M$:** Αυξάνει την Ανάκληση (Recall $\approx 100\%$), αλλά μειώνει το QPS.
+  - **Μικρότερο $M$:** Μειώνει τον χρόνο αναζήτησης (πολύ υψηλό QPS), αλλά ενδέχεται να μειώσει την Ανάκληση.
