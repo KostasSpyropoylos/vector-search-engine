@@ -317,7 +317,6 @@ def generate_pdf_report(results, filename='output/report.pdf'):
     
     # Metadata block
     meta_text = """
-    <b>Μάθημα:</b> Ανάκτηση Πληροφοριών<br/>
     <b>Φοιτητής:</b> Κωνσταντίνος Σπυρόπουλος<br/>
     <b>Μυτρώο:</b> Ε19163<br/>
     <b>Σύνολο Δεδομένων:</b> SIFT1M Dataset (128-dimensional vectors)
